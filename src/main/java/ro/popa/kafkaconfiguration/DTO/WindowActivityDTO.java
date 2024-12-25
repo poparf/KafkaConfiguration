@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActiveWindowDTO {
+public class WindowActivityDTO {
     private String title;
     @JsonProperty("start_time")
     private Long startTime;
