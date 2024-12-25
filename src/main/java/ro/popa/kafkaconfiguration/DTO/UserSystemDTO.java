@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserSystemInfo {
+public class UserSystemDTO {
     private String username;
     @JsonProperty("computer_name")
     private String computerName;
