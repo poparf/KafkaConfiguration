@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import ro.popa.kafkaconfiguration.DTO.WindowActivityDTO;
 import ro.popa.kafkaconfiguration.DTO.UserSystemDTO;
 import ro.popa.kafkaconfiguration.entities.UserSystem;
+import ro.popa.kafkaconfiguration.entities.WindowActivity;
 import ro.popa.kafkaconfiguration.services.UserSystemService;
 import ro.popa.kafkaconfiguration.services.WindowActivityService;
 
@@ -17,11 +18,9 @@ import ro.popa.kafkaconfiguration.services.WindowActivityService;
 public class ActiveWindowConsumer {
 
     private final Logger logger = LoggerFactory.getLogger(ActiveWindowConsumer.class);
-    private UserSystemService userSystemService;
     private WindowActivityService windowActivityService;
 
-    public ActiveWindowConsumer (UserSystemService userSystemService, WindowActivityService windowActivityService) {
-        this.userSystemService = userSystemService;
+    public ActiveWindowConsumer (WindowActivityService windowActivityService) {
         this.windowActivityService = windowActivityService;
     }
 
@@ -32,20 +31,15 @@ public class ActiveWindowConsumer {
         try {
             JsonNode rootNode = objectMapper.readTree(message);
             JsonNode userJsonNode = rootNode.get("user");
-            UserSystemDTO user = objectMapper.treeToValue(userJsonNode, UserSystemDTO.class);
+            UserSystemDTO userDTO = objectMapper.treeToValue(userJsonNode, UserSystemDTO.class);
 
             JsonNode activeWindowJsonNode = rootNode.get("data");
             WindowActivityDTO windowActivityDTO = objectMapper.treeToValue(activeWindowJsonNode, WindowActivityDTO.class);
-            logger.info(String.format("Consumed message 1/2 -> %s", user));
+            logger.info(String.format("Consumed message 1/2 -> %s", userDTO));
             logger.info(String.format("Consumed message 2/2 -> %s", windowActivityDTO));
 
-            UserSystem userSystem = new UserSystem();
-            userSystem.setUsername(user.getUsername());
-            userSystem.setOs(user.getOs());
-            userSystem.setComputer_name(user.getComputerName());
-            userSystem.setIp(user.getIp());
-            //UserSystem userSystemSaved = userSystemServiceImpl.save(userSystem);
-            //logger.info(String.format("UserSystem saved -> %s", userSystemSaved));
+            WindowActivity w = windowActivityService.saveWindowActivityData(windowActivityDTO, userDTO);
+            logger.info(String.format("Saved window activity -> %s", w));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

@@ -33,16 +33,16 @@ public class PeriodicScreenshotServiceImpl implements PeriodicScreenshotService 
     }
 
     @Override
-    public PeriodicScreenshot saveScreenshot(PeriodicScreenshotDTO periodicScreenshotDTO, UserSystemDTO userSystem) {
+    public PeriodicScreenshot saveScreenshot(PeriodicScreenshotDTO periodicScreenshotDTO, UserSystemDTO userSystemDTO) {
         PeriodicScreenshot periodicScreenshot = new PeriodicScreenshot();
         byte[] decodedBytes = Base64.getDecoder().decode(periodicScreenshotDTO.getScreenshotB64Encoded());
         periodicScreenshot.setScreenshot(decodedBytes);
         periodicScreenshot.setTimestamp(new Date(periodicScreenshotDTO.getTimestamp() * 1000));
-        UserSystem userSystemFound = userSystemService.findByUsername(userSystem.getUsername());
-        if(userSystemFound == null) {
-            userSystemFound = userSystemService.save(userSystem);
-        }
-        periodicScreenshot.setUserSystem(userSystemFound);
+        UserSystem user = userSystemService
+                .findByUsernameAndComputerName(userSystemDTO.getUsername(), userSystemDTO.getComputerName())
+                .orElseGet(() -> userSystemService.save(userSystemDTO));
+
+        periodicScreenshot.setUserSystem(user);
         return periodicScreenshotRepository.save(periodicScreenshot);
     }
 }

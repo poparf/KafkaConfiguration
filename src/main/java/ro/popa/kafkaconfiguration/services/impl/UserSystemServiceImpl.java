@@ -6,6 +6,8 @@ import ro.popa.kafkaconfiguration.entities.UserSystem;
 import ro.popa.kafkaconfiguration.repositories.UserSystemRepository;
 import ro.popa.kafkaconfiguration.services.UserSystemService;
 
+import java.util.Optional;
+
 @Service
 public class UserSystemServiceImpl implements UserSystemService {
 
@@ -16,23 +18,23 @@ public class UserSystemServiceImpl implements UserSystemService {
     }
 
     public UserSystem save(UserSystemDTO userSystemDTO) {
-        if(!userSystemRepository.existsByUsername(userSystemDTO.getUsername())) {
+        if(userSystemRepository.existsByUsernameAndComputerName(userSystemDTO.getUsername(), userSystemDTO.getComputerName())) {
+           return null;
+        } else {
             UserSystem userSystem = new UserSystem();
             userSystem.setUsername(userSystemDTO.getUsername());
-            userSystem.setComputer_name(userSystemDTO.getComputerName());
+            userSystem.setComputerName(userSystemDTO.getComputerName());
             userSystem.setIp(userSystemDTO.getIp());
             userSystem.setOs(userSystemDTO.getOs());
             return userSystemRepository.save(userSystem);
-        } else {
-            return null;
         }
     }
 
     public UserSystem save(UserSystem userSystem) {
-        if(!userSystemRepository.existsByUsername(userSystem.getUsername())) {
-            return userSystemRepository.save(userSystem);
-        } else {
+        if(userSystemRepository.existsByUsernameAndComputerName(userSystem.getUsername(), userSystem.getComputerName())) {
             return null;
+        } else {
+            return userSystemRepository.save(userSystem);
         }
     }
 
@@ -43,5 +45,10 @@ public class UserSystemServiceImpl implements UserSystemService {
     @Override
     public UserSystem findByUsername(String username) {
         return userSystemRepository.findByUsername(username).orElse(null);
+    }
+
+    @Override
+    public Optional<UserSystem> findByUsernameAndComputerName(String username, String computerName) {
+        return userSystemRepository.findByUsernameAndComputerName(username, computerName);
     }
 }

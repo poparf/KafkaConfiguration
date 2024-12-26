@@ -9,6 +9,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import ro.popa.kafkaconfiguration.DTO.PeriodicScreenshotDTO;
 import ro.popa.kafkaconfiguration.DTO.UserSystemDTO;
+import ro.popa.kafkaconfiguration.entities.PeriodicScreenshot;
+import ro.popa.kafkaconfiguration.entities.WindowActivity;
 import ro.popa.kafkaconfiguration.services.PeriodicScreenshotService;
 
 
@@ -16,7 +18,7 @@ import ro.popa.kafkaconfiguration.services.PeriodicScreenshotService;
 public class ScreenshotConsumer {
 
     private final Logger logger = LoggerFactory.getLogger(ActiveWindowConsumer.class);
-    PeriodicScreenshotService periodicScreenshotService;
+    private final PeriodicScreenshotService periodicScreenshotService;
 
     public ScreenshotConsumer(PeriodicScreenshotService periodicScreenshotService) {
         this.periodicScreenshotService = periodicScreenshotService;
@@ -34,12 +36,11 @@ public class ScreenshotConsumer {
             JsonNode screenshotJsonNode = rootNode.get("data");
             PeriodicScreenshotDTO periodicScreenshotDTO = objectMapper.treeToValue(screenshotJsonNode, PeriodicScreenshotDTO.class);
             logger.info(String.format("Consumed message 1/2 -> %s", userDTO));
-            logger.info(String.format("SCREENSHOT Consumed message 2/2 -> %s", periodicScreenshotDTO));
+            logger.info(String.format("SCREENSHOT Consumed message 2/2 -> %s", periodicScreenshotDTO.getTimestamp()));
 
-            periodicScreenshotService.saveScreenshot(periodicScreenshotDTO,  userDTO);
+            PeriodicScreenshot w = periodicScreenshotService.saveScreenshot(periodicScreenshotDTO,  userDTO);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
-
 }
